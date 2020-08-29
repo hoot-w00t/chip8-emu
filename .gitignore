@@ -1,0 +1,7 @@
+.vscode/
+*.vgcore
+*.d
+*.o
+*.bin
+*.rom
+chip8
