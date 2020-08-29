@@ -1,3 +1,5 @@
+#include "chip8/defs.h"
+
 #ifndef _CHIP8_CPU_H
 #define _CHIP8_CPU_H
 
