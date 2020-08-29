@@ -7,7 +7,7 @@ LDFLAGS	=	$(shell sdl2-config --cflags --libs) -lm
 SRC	=	src/main.c				\
 		src/emulator.c			\
 		src/logger.c			\
-		src/chip8_system.c		\
+		src/system.c			\
 		src/audio.c				\
 		src/cpu.c				\
 		src/opcodes/opcode_0.c	\
