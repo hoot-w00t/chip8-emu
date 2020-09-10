@@ -4,3 +4,6 @@
 *.o
 *.bin
 *.rom
+*-w64-mingw32/
+*.dll
+*.exe
