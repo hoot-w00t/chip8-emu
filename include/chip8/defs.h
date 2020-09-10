@@ -34,6 +34,7 @@ struct chip8_system {
     uint16_t stack[STACK_SIZE];   // stack
     uint16_t stack_ptr;           // stack pointer
     byte_t screen_refreshed;      // 0 if screen doesn't need a refresh, 1 if it does
+    uint32_t cycle;               // current CPU cycle
 };
 
 #endif

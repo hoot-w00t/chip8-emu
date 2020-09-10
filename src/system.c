@@ -49,6 +49,7 @@ chip8_system_t *create_chip8_system(void)
     c8->keypress_reg = 0xFF;
     c8->keypress = 0xFF;
     c8->screen_refreshed = 1;
+    c8->cycle = 0;
 
     return c8;
 }

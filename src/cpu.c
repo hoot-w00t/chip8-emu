@@ -51,8 +51,8 @@ int cpu_cycle(chip8_system_t *c8)
     }
 
     // Retrieve the opcode
-    logger(LOG_DEBUG, "Reading opcode at PC 0x%04X", c8->pc);
     opcode = (c8->memory[c8->pc] << 8) | c8->memory[c8->pc + 1];
+    logger(LOG_DEBUG, "Fetched opcode %04X at PC 0x%04X", opcode, c8->pc);
 
     // Decode and execute instruction
     if ((result = execute_opcode(opcode, c8)) < 0) {
@@ -65,5 +65,6 @@ int cpu_cycle(chip8_system_t *c8)
         return result;
     }
 
+    c8->cycle += 1;
     return 0;
 }
