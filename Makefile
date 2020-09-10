@@ -2,7 +2,7 @@ CC	=	cc
 INCLUDE	=	-Iinclude
 OPT_FLAGS	=	-O3
 CFLAGS	=	-W -Wall -Wextra -pipe $(OPT_FLAGS) $(INCLUDE)
-LDFLAGS	=	$(shell sdl2-config --cflags --libs) -lm
+LDFLAGS	=	$(shell sdl2-config --libs) -lm
 
 SRC	=	src/main.c				\
 		src/emulator.c			\
