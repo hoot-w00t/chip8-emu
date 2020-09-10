@@ -65,11 +65,5 @@ int cpu_cycle(chip8_system_t *c8)
         return result;
     }
 
-    if (c8->sound_timer > 0) {
-        c8->sound_timer -= 1;
-    }
-    if (c8->delay_timer > 0) {
-        c8->delay_timer -= 1;
-    }
     return 0;
 }
