@@ -41,7 +41,7 @@ int opcode_FX18(const byte_t x, chip8_system_t *c8)
 int opcode_FX1E(const byte_t x, chip8_system_t *c8)
 {
     logger(LOG_DEBUG, "opcode 0xFX1E: I += 0x%02X (V%x)", c8->V[x], x);
-    c8->I = c8->V[x];
+    c8->I += c8->V[x];
     c8->pc += 2;
 
     return 0;
