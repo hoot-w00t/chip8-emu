@@ -61,6 +61,12 @@ uint16_t load_bytes_in_memory(const byte_t *bytes, const uint16_t length,
 
     if (set_pc)
         c8->pc = offset;
+
+    logger(LOG_DEBUG, "Loading %u bytes in memory starting at address 0x%04X%s",
+                      length,
+                      offset,
+                      set_pc ? " (set to PC)" : "");
+
     for (i = 0, j = offset; i < length; ++i, ++j) {
         if (j >= sizeof(c8->memory) - 1)
             break;
@@ -75,23 +81,32 @@ uint16_t load_bytes_in_memory(const byte_t *bytes, const uint16_t length,
 // return the amount of loaded bytes
 int load_chip8_program(const char *filename, chip8_system_t *c8)
 {
-    int fd = open(filename, O_RDONLY);
+    #if defined(WIN32)
+    const int oflag = O_RDONLY | O_BINARY;
+    #else
+    const int oflag = O_RDONLY;
+    #endif
 
-    if (fd < 0) {
+    byte_t buffer[sizeof(c8->memory)];
+    uint16_t size;
+    int fd, n;
+
+    if ((fd = open(filename, oflag)) < 0) {
         logger(LOG_ERROR, "Unable to open: %s: %s",
                           filename,
                           strerror(errno));
         return -1;
     }
 
-    byte_t buffer[sizeof(c8->memory)];
-    uint16_t size = 0;
-    int n;
-
+    size = 0;
     while ((n = read(fd, &buffer[size], sizeof(c8->memory) - size)) > 0) {
         size += n;
     }
     close(fd);
+
+    logger(LOG_DEBUG, "Read %u bytes from file: %s",
+                      size,
+                      filename);
 
     if (n < 0) {
         logger(LOG_ERROR, "Error while reading: %s: %s",
