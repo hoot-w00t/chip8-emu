@@ -29,6 +29,8 @@ struct chip8_system {
     byte_t delay_timer;           // delay timer (for events, read/write)
     byte_t sound_timer;           // sound timer (buzzer)
     byte_t keys[16];              // hex keys (stores states for each key)
+    byte_t keypress_reg;          // if <= 0xF, await key press to store it in Vx
+    byte_t keypress;              // last key pressed
     uint16_t stack[STACK_SIZE];   // stack
     uint16_t stack_ptr;           // stack pointer
     byte_t screen_refreshed;      // 0 if screen doesn't need a refresh, 1 if it does

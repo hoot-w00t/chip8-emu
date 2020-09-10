@@ -12,38 +12,22 @@
 void set_key_state(SDL_Event *e, byte_t state, chip8_system_t *c8)
 {
     switch (e->key.keysym.sym) {
-        case SDLK_0: c8->keys[0x0] = state;
-            break;
-        case SDLK_1: c8->keys[0x1] = state;
-            break;
-        case SDLK_2: c8->keys[0x2] = state;
-            break;
-        case SDLK_3: c8->keys[0x3] = state;
-            break;
-        case SDLK_4: c8->keys[0x4] = state;
-            break;
-        case SDLK_5: c8->keys[0x5] = state;
-            break;
-        case SDLK_6: c8->keys[0x6] = state;
-            break;
-        case SDLK_7: c8->keys[0x7] = state;
-            break;
-        case SDLK_8: c8->keys[0x8] = state;
-            break;
-        case SDLK_9: c8->keys[0x9] = state;
-            break;
-        case SDLK_a: c8->keys[0xA] = state;
-            break;
-        case SDLK_b: c8->keys[0xB] = state;
-            break;
-        case SDLK_c: c8->keys[0xC] = state;
-            break;
-        case SDLK_d: c8->keys[0xD] = state;
-            break;
-        case SDLK_e: c8->keys[0xE] = state;
-            break;
-        case SDLK_f: c8->keys[0xF] = state;
-            break;
+        case SDLK_0: c8->keys[0x0] = state; if (state) c8->keypress = 0x0; break;
+        case SDLK_1: c8->keys[0x1] = state; if (state) c8->keypress = 0x1; break;
+        case SDLK_2: c8->keys[0x2] = state; if (state) c8->keypress = 0x2; break;
+        case SDLK_3: c8->keys[0x3] = state; if (state) c8->keypress = 0x3; break;
+        case SDLK_4: c8->keys[0x4] = state; if (state) c8->keypress = 0x4; break;
+        case SDLK_5: c8->keys[0x5] = state; if (state) c8->keypress = 0x5; break;
+        case SDLK_6: c8->keys[0x6] = state; if (state) c8->keypress = 0x6; break;
+        case SDLK_7: c8->keys[0x7] = state; if (state) c8->keypress = 0x7; break;
+        case SDLK_8: c8->keys[0x8] = state; if (state) c8->keypress = 0x8; break;
+        case SDLK_9: c8->keys[0x9] = state; if (state) c8->keypress = 0x9; break;
+        case SDLK_a: c8->keys[0xA] = state; if (state) c8->keypress = 0xA; break;
+        case SDLK_b: c8->keys[0xB] = state; if (state) c8->keypress = 0xB; break;
+        case SDLK_c: c8->keys[0xC] = state; if (state) c8->keypress = 0xC; break;
+        case SDLK_d: c8->keys[0xD] = state; if (state) c8->keypress = 0xD; break;
+        case SDLK_e: c8->keys[0xE] = state; if (state) c8->keypress = 0xE; break;
+        case SDLK_f: c8->keys[0xF] = state; if (state) c8->keypress = 0xF; break;
         default: break;
     }
 }
@@ -158,8 +142,13 @@ int emulate_chip8_program(const char *filename, const int cps,
         if (!paused && (step || ticks - last_tick >= interval)) {
             last_tick = ticks;
 
-            logger(LOG_DEBUG, "Cycle %u", ++cycle_nb);
-            break_loop = cpu_cycle(c8);
+            logger(LOG_DEBUG, "Cycle %u", cycle_nb);
+            if ((break_loop = cpu_cycle(c8)) == 1) {
+                break_loop = 0;
+            } else {
+                ++cycle_nb;
+            }
+
             if (c8->screen_refreshed) {
                 render_chip8_screen(ren, pixel_size, c8);
             }

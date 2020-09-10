@@ -12,10 +12,9 @@ int opcode_FX07(const byte_t x, chip8_system_t *c8)
 
 int opcode_FX0A(const byte_t x, chip8_system_t *c8)
 {
-    byte_t key = 0x0; // TODO: get_key() or something, blocking call
-
-    logger(LOG_CRIT, "opcode 0xFX0A: To-Do: set V%x to key press %f", x, key);
-    c8->V[x] = key;
+    logger(LOG_DEBUG, "opcode 0xFX0A: set V%x to key press", x);
+    c8->keypress_reg = x;
+    c8->keypress = 0xFF;
     c8->pc += 2;
 
     return 0;

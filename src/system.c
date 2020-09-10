@@ -46,6 +46,8 @@ chip8_system_t *create_chip8_system(void)
     memset(c8->keys, 0, sizeof(c8->keys));
     memset(c8->stack, 0, sizeof(c8->stack));
     c8->stack_ptr = 0;
+    c8->keypress_reg = 0xFF;
+    c8->keypress = 0xFF;
     c8->screen_refreshed = 1;
 
     return c8;
@@ -176,6 +178,10 @@ void dump_chip8_system(chip8_system_t *c8)
 {
     printf("\nPC: 0x%04X    I: 0x%04X\n", c8->pc, c8->I);
     printf("Delay timer: %u    Sound timer: %u\n", c8->delay_timer, c8->sound_timer);
+    printf("Last key pressed: %X%s\n",
+            c8->keypress,
+            c8->keypress_reg <= 0xF ? " (waiting for keypress)" : "");
+
     dump_registers(c8);
     dump_stack(c8);
     dump_pressed_keys(c8);

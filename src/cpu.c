@@ -34,6 +34,16 @@ int cpu_cycle(chip8_system_t *c8)
     uint16_t opcode;
     int result;
 
+    if (c8->keypress_reg <= 0xF && c8->keypress <= 0xF) {
+        // Store key press in Vx
+        c8->V[c8->keypress_reg] = c8->keypress;
+        c8->keypress_reg = 0xFF;
+
+    } else if (c8->keypress_reg <= 0xF) {
+        // Await key press
+        return 1;
+    }
+
     // Make sure that the PC is within memory
     if ((uint32_t) (c8->pc + 1) > sizeof(c8->memory)) {
         logger(LOG_CRIT, "PC is out of memory bounds: 0x%04X", c8->pc);
