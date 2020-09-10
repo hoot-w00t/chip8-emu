@@ -91,20 +91,24 @@ int create_window(SDL_Window **win, SDL_Renderer **ren, const int pixel_size)
 
 // load and emulate *filename at cps cycles per second
 int emulate_chip8_program(const char *filename, const int cps,
-    const int pixel_size, const bool step)
+    const int pixel_size, const int framerate)
 {
+    int break_loop = 0;
+    bool paused = false;
+    uint32_t cycles, last_cycle = 0, last_tick = 0, frames = 0;
+    double elapsed, refresh = 0, timers = 0;
     char window_title[256];
-    chip8_system_t *c8;
     SDL_Window *win;
     SDL_Renderer *ren;
     SDL_AudioSpec audio;
+    SDL_Event e;
+    chip8_system_t *c8;
 
     // Initialize Chip8 system
     c8 = create_chip8_system();
-    if (!c8)
-        return EXIT_FAILURE;
+    if (!c8) return EXIT_FAILURE;
 
-    load_chip8_fontset(c8);
+    // Load Chip8 program in memory
     if (load_chip8_program(filename, c8) < 0) {
         free(c8);
         return EXIT_FAILURE;
@@ -116,6 +120,7 @@ int emulate_chip8_program(const char *filename, const int cps,
         return EXIT_FAILURE;
     }
 
+    // Set window title
     snprintf(
         window_title,
         sizeof(window_title),
@@ -128,48 +133,38 @@ int emulate_chip8_program(const char *filename, const int cps,
     SDL_PauseAudio(1);
 
     // Emulation loop
-    int break_loop = 0; // If nonzero, break the loop and exit the program
-    bool paused = false;
-    bool _paused = false;
-    uint32_t cycle_nb = 0, last_cycle_nb = 0;
-    uint32_t last_tick = 0, last_second = 0, ticks;
-    uint32_t interval = cps > 0 ? (uint32_t) 1000 / cps : 0;
-    SDL_Event e;
-
     render_chip8_screen(ren, pixel_size, c8);
-    while (!break_loop) {
-        ticks = SDL_GetTicks();
-        if (!paused && (step || ticks - last_tick >= interval)) {
-            last_tick = ticks;
+    while (break_loop >= 0) {
+        elapsed = (SDL_GetTicks() - last_tick) / 1000.0;
+        frames += 1; refresh += elapsed; timers += elapsed;
 
-            logger(LOG_DEBUG, "Cycle %u", cycle_nb);
-            if ((break_loop = cpu_cycle(c8)) == 1) {
-                break_loop = 0;
-            } else {
-                ++cycle_nb;
+        if (!paused) {
+            cycles = elapsed * cps;
+
+            for (uint32_t i = 0; i < cycles; ++i) break_loop = cpu_cycle(c8);
+            if (c8->screen_refreshed) render_chip8_screen(ren, pixel_size, c8);
+
+            for (; timers >= 1.0 / 60.0; timers -= 1.0 / 60.0) {
+                if (c8->sound_timer > 0) {
+                    SDL_PauseAudio(0);
+                    c8->sound_timer -= 1;
+                } else {
+                    SDL_PauseAudio(1);
+                }
+                if (c8->delay_timer > 0) {
+                    c8->delay_timer -= 1;
+                }
             }
-
-            if (c8->screen_refreshed) {
-                render_chip8_screen(ren, pixel_size, c8);
-            }
-
-            if (c8->sound_timer > 0) {
-                SDL_PauseAudio(0);
-            } else {
-                SDL_PauseAudio(1);
-            }
-
-            if (step)
-                paused = true;
         }
+
+        last_tick = SDL_GetTicks();
 
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
-                case SDL_QUIT: break_loop = 1;
-                    break;
+                case SDL_QUIT: break_loop = -2; break;
                 case SDL_KEYDOWN:
                     if (e.key.keysym.sym == SDLK_ESCAPE) {
-                        break_loop = 1;
+                        break_loop = -2;
                     } else if (e.key.keysym.sym == SDLK_SPACE) {
                         paused = !paused;
                     } else if (e.key.keysym.sym == SDLK_n) {
@@ -178,43 +173,34 @@ int emulate_chip8_program(const char *filename, const int cps,
                         set_key_state(&e, 1, c8);
                     }
                     break;
-                case SDL_KEYUP: set_key_state(&e, 0, c8);
-                    break;
+
+                case SDL_KEYUP: set_key_state(&e, 0, c8); break;
                 default: break;
             }
         }
 
-        if (!paused && ticks - last_second >= 1000) {
-            snprintf(
-                window_title,
-                sizeof(window_title),
-                "Chip8 - %s (%u cps)",
-                filename,
-                cycle_nb - last_cycle_nb);
+        if (refresh >= 1) {
+            if (paused) {
+                snprintf(
+                    window_title,
+                    sizeof(window_title),
+                    "Chip8 - %s (paused)",
+                    filename);
+            } else {
+                snprintf(
+                    window_title,
+                    sizeof(window_title),
+                    "Chip8 - %s (%u cps, %u fps)",
+                    filename,
+                    c8->cycle - last_cycle,
+                    frames);
+            }
+
             SDL_SetWindowTitle(win, window_title);
-            last_cycle_nb = cycle_nb;
-            last_second = ticks;
+            last_cycle = c8->cycle; frames = 0; refresh = 0;
         }
 
-        if (paused && !_paused) {
-            _paused = paused;
-            snprintf(
-                window_title,
-                sizeof(window_title),
-                "Chip8 - %s (paused)",
-                filename);
-            SDL_SetWindowTitle(win, window_title);
-        } else if (!paused && _paused) {
-            _paused = paused;
-            snprintf(
-                window_title,
-                sizeof(window_title),
-                "Chip8 - %s",
-                filename);
-            SDL_SetWindowTitle(win, window_title);
-        }
-
-        SDL_Delay(interval);
+        SDL_Delay(1000 / framerate);
     }
 
     SDL_CloseAudio();
@@ -223,5 +209,5 @@ int emulate_chip8_program(const char *filename, const int cps,
     SDL_Quit();
     free(c8);
 
-    return break_loop >= 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+    return 0;
 }
