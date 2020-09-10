@@ -28,32 +28,6 @@ const byte_t chip8_fontset[80] = {
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
-// allocate a chip8 system and initialize it
-chip8_system_t *create_chip8_system(void)
-{
-    chip8_system_t *c8 = malloc(sizeof(chip8_system_t));
-
-    if (!c8)
-        return NULL;
-
-    memset(c8->V, 0, sizeof(c8->V));
-    c8->I = 0;
-    c8->pc = 0;
-    memset(c8->memory, 0, sizeof(c8->memory));
-    memset(c8->video_memory, 0, sizeof(c8->video_memory));
-    c8->delay_timer = 0;
-    c8->sound_timer = 0;
-    memset(c8->keys, 0, sizeof(c8->keys));
-    memset(c8->stack, 0, sizeof(c8->stack));
-    c8->stack_ptr = 0;
-    c8->keypress_reg = 0xFF;
-    c8->keypress = 0xFF;
-    c8->screen_refreshed = 1;
-    c8->cycle = 0;
-
-    return c8;
-}
-
 // load length amount of bytes in c8->memory starting at offset
 // if we reach the end of the memory space, discard the remaining bytes
 // return the amount of written bytes
@@ -130,6 +104,30 @@ uint16_t load_chip8_fontset(chip8_system_t *c8)
         0x0,
         c8,
         false);
+}
+
+// reset a chip8 system
+void reset_chip8_system(chip8_system_t *c8)
+{
+    memset(c8, 0, sizeof(chip8_system_t));
+
+    c8->pc = LOAD_ADDRESS;
+    c8->keypress_reg = 0xFF;
+    c8->keypress = 0xFF;
+    c8->screen_refreshed = 1;
+
+    load_chip8_fontset(c8);
+}
+
+// allocate a chip8 system and initialize it
+chip8_system_t *create_chip8_system(void)
+{
+    chip8_system_t *c8 = malloc(sizeof(chip8_system_t));
+
+    if (!c8) return NULL;
+
+    reset_chip8_system(c8);
+    return c8;
 }
 
 // dump n bytes starting at address from c8->memory
