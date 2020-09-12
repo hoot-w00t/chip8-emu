@@ -1,4 +1,5 @@
 #include "chip8/emulator.h"
+#include "chip8/display.h"
 #include "logger.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,7 +21,7 @@ void print_help(const char *cmd)
 int main(int ac, char **av)
 {
     const char optstring[] = "hl:p:c:f:";
-    int opt, pixel_size = 8, cps = 900, fps = 60;
+    int opt, cps = 900, fps = 60;
 
     while ((opt = getopt(ac, av, optstring)) != -1) {
         switch (opt) {
@@ -36,8 +37,7 @@ int main(int ac, char **av)
                 break;
 
             case 'p':
-                pixel_size = atoi(optarg);
-                if (pixel_size <= 0) {
+                if (set_pixel_size(atoi(optarg)) < 0) {
                     fprintf(stderr, "Invalid pixel size: %s\n", optarg);
                     return EXIT_FAILURE;
                 }
@@ -68,5 +68,5 @@ int main(int ac, char **av)
         return EXIT_FAILURE;
     }
 
-    return emulate_chip8_program(av[optind], cps, pixel_size, fps);
+    return emulate_chip8_program(av[optind], cps, fps);
 }

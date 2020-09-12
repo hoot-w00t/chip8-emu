@@ -9,6 +9,7 @@ SRC	=	src/main.c				\
 		src/logger.c			\
 		src/system.c			\
 		src/audio.c				\
+		src/display.c			\
 		src/cpu.c				\
 		src/opcodes/opcode_0.c	\
 		src/opcodes/opcode_1.c	\
