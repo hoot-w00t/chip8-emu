@@ -1,4 +1,5 @@
 #include "chip8/defs.h"
+#include <stdio.h>
 #include <stdarg.h>
 #include <SDL2/SDL.h>
 
