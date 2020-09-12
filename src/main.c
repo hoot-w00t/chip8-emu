@@ -1,4 +1,5 @@
 #include "chip8/emulator.h"
+#include "chip8/display.h"
 #include "logger.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,16 +14,14 @@ void print_help(const char *cmd)
     printf("    -l level     logging level (default: warn)\n");
     printf("                 (debug, info, warn, error, critical)\n");
     printf("    -p size      rendered pixel size (default: 8)\n");
-    printf("    -c cps       CPU cycles per second (default: 60)\n");
-    printf("                 0 means as fast as possible\n");
-    printf("    -s           step by step cycle emulation for debugging\n");
+    printf("    -c cps       CPU cycles per second (default: 900)\n");
+    printf("    -f fps       Framerate (default: 60)\n");
 }
 
 int main(int ac, char **av)
 {
-    const char optstring[] = "hl:p:c:s";
-    int opt, pixel_size = 8, cps = 60;
-    bool step = false;
+    const char optstring[] = "hl:p:c:f:";
+    int opt, cps = 900, fps = 60;
 
     while ((opt = getopt(ac, av, optstring)) != -1) {
         switch (opt) {
@@ -38,8 +37,7 @@ int main(int ac, char **av)
                 break;
 
             case 'p':
-                pixel_size = atoi(optarg);
-                if (pixel_size <= 0) {
+                if (set_pixel_size(atoi(optarg)) < 0) {
                     fprintf(stderr, "Invalid pixel size: %s\n", optarg);
                     return EXIT_FAILURE;
                 }
@@ -47,14 +45,18 @@ int main(int ac, char **av)
 
             case 'c':
                 cps = atoi(optarg);
-                if (cps < 0) {
+                if (cps <= 0) {
                     fprintf(stderr, "Invalid cycles per second: %s\n", optarg);
                     return EXIT_FAILURE;
                 }
                 break;
 
-            case 's':
-                step = true;
+            case 'f':
+                fps = atoi(optarg);
+                if (fps <= 0) {
+                    fprintf(stderr, "Invalid framerate: %s\n", optarg);
+                    return EXIT_FAILURE;
+                }
                 break;
 
             default: return EXIT_FAILURE;
@@ -66,5 +68,5 @@ int main(int ac, char **av)
         return EXIT_FAILURE;
     }
 
-    return emulate_chip8_program(av[optind], cps, pixel_size, step);
+    return emulate_chip8_program(av[optind], cps, fps);
 }

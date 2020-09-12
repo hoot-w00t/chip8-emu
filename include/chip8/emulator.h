@@ -5,7 +5,6 @@
 
 #define EMU_AUDIO_SAMPLE_RATE (22050)
 
-int emulate_chip8_program(const char *filename, const int cps,
-    const int pixel_size, const bool step);
+int emulate_chip8_program(const char *filename, const int cps, const int framerate);
 
 #endif

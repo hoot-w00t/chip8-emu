@@ -6,10 +6,10 @@ int opcode_0NNN(const uint16_t opcode, chip8_system_t *c8)
 {
     uint16_t jmp_address = opcode & 0x0FFF;
 
-    logger(LOG_CRIT, "opcode 0x0NNN: To-Do: call machine code routine at 0x%04X", jmp_address);
+    logger(LOG_WARN, "opcode 0x0NNN: Ignored: call machine code routine at 0x%04X", jmp_address);
     c8->pc += 2;
 
-    return -1;
+    return 0;
 }
 
 int opcode_00E0(chip8_system_t *c8)

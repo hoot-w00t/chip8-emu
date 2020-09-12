@@ -34,6 +34,16 @@ int cpu_cycle(chip8_system_t *c8)
     uint16_t opcode;
     int result;
 
+    if (c8->keypress_reg <= 0xF && c8->keypress <= 0xF) {
+        // Store key press in Vx
+        c8->V[c8->keypress_reg] = c8->keypress;
+        c8->keypress_reg = 0xFF;
+
+    } else if (c8->keypress_reg <= 0xF) {
+        // Await key press
+        return 1;
+    }
+
     // Make sure that the PC is within memory
     if ((uint32_t) (c8->pc + 1) > sizeof(c8->memory)) {
         logger(LOG_CRIT, "PC is out of memory bounds: 0x%04X", c8->pc);
@@ -41,8 +51,8 @@ int cpu_cycle(chip8_system_t *c8)
     }
 
     // Retrieve the opcode
-    logger(LOG_DEBUG, "Reading opcode at PC 0x%04X", c8->pc);
     opcode = (c8->memory[c8->pc] << 8) | c8->memory[c8->pc + 1];
+    logger(LOG_DEBUG, "Fetched opcode %04X at PC 0x%04X", opcode, c8->pc);
 
     // Decode and execute instruction
     if ((result = execute_opcode(opcode, c8)) < 0) {
@@ -55,11 +65,6 @@ int cpu_cycle(chip8_system_t *c8)
         return result;
     }
 
-    if (c8->sound_timer > 0) {
-        c8->sound_timer -= 1;
-    }
-    if (c8->delay_timer > 0) {
-        c8->delay_timer -= 1;
-    }
+    c8->cycle += 1;
     return 0;
 }
