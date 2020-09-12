@@ -1,3 +1,7 @@
+#if defined(WIN32)
+#define SDL_MAIN_HANDLED
+#endif
+
 #include "chip8/emulator.h"
 #include "chip8/display.h"
 #include "logger.h"

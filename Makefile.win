@@ -1,5 +1,5 @@
 ARCH    =   x86_64
-LIBSDL_PATH	=	$(ARCH)-w64-mingw32
+LIBSDL_PATH	=	win/sdl2-$(ARCH)
 
 CC	=	$(ARCH)-w64-mingw32-gcc
 INCLUDE	=	-Iinclude -I$(LIBSDL_PATH)/include
@@ -12,6 +12,7 @@ SRC	=	src/main.c				\
 		src/logger.c			\
 		src/system.c			\
 		src/audio.c				\
+		src/display.c			\
 		src/cpu.c				\
 		src/opcodes/opcode_0.c	\
 		src/opcodes/opcode_1.c	\
@@ -41,6 +42,7 @@ all:	$(BINARY)
 
 $(BINARY):	$(OBJ)
 	$(CC) -o $@ $(CFLAGS) $^ $(LDFLAGS)
+	cp $(LIBSDL_PATH)/bin/SDL2.dll .
 
 %.o:	%.c
 	$(CC) $(CFLAGS) -MMD -o $@ -c $<
