@@ -41,7 +41,7 @@ $(BINARY):	$(OBJ)
 	$(CC) -o $@ $(CFLAGS) $^ $(LDFLAGS)
 
 obj/%.o:	src/%.c
-	@mkdir -p $(shell dirname -- $@)
+	@mkdir -p "$(shell dirname -- $@)"
 	$(CC) $(CFLAGS) -MMD -o $@ -c $<
 
 clean:
