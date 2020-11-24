@@ -1,8 +1,7 @@
 CC	=	cc
 INCLUDE	=	-Iinclude
-OPT_FLAGS	=	-O3
-CFLAGS	=	-W -Wall -Wextra -pipe $(OPT_FLAGS) $(INCLUDE)
-LDFLAGS	=	$(shell sdl2-config --libs) -lm
+CFLAGS	=	-W -Wall -Wextra -O2 -pipe $(INCLUDE)
+LDFLAGS	=	$(shell sdl2-config --libs)
 
 SRC	=	main.c				\
 		emulator.c			\
@@ -32,6 +31,10 @@ OBJ	=	$(SRC:%.c=obj/%.o)
 DEP	=	$(OBJ:.o=.d)
 
 BINARY	=	chip8
+
+ifdef DEBUG
+	CFLAGS	+=	-g
+endif
 
 .PHONY:	all	clean	fclean	re
 
